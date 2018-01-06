@@ -1,10 +1,15 @@
 def xor(b1, b2):
+    """Return a bytearray of the 2 XORed bytearray parameters"""
+
     b = bytearray(len(b1))
     for i in range(len(b1)):
         b[i] = b1[i] ^ b2[i]
     return b
 
+
 def score(s):
+    """Return frequency score based on the letter frequencies of the English language."""
+
     score = 0
     freq = {}
 
@@ -42,14 +47,22 @@ def score(s):
 
     return score
 
+
 def break_single_key_xor(b1):
+    """Return tuple of the XOR key + the plaintext
+    Based on a frequency score derived by the English language.
+
+    Keyword arguments:
+    ciphertext -- the ciphertext that XOR was applied to
+    """
+
     max_score = None
     result_plaintext = None
     key = None
 
     for i in range(256):
         b2 = [i] * len(b1)
-        plaintext = bytes(xor(b1, b2))
+        plaintext = bytes(xor(bytearray(b1), b2))
         line_score = score(plaintext)
 
         if line_score > max_score or not max_score:
@@ -59,9 +72,9 @@ def break_single_key_xor(b1):
     return key, result_plaintext
 
 
-def hamming(s1, s2):
-    # Only works for strings of same length because of zip()
-    # Update: works correctly cause of map(None, x, y)
+def hamming_str(s1, s2):
+    """Return the Hamming distance between two strings, cause of map()"""
+
     diffs = 0
     bin1 = bin(int(s1.encode('hex'), 16))
     bin2 = bin(int(s2.encode('hex'), 16))
@@ -71,3 +84,36 @@ def hamming(s1, s2):
         if bit1 != bit2:
             diffs += 1
     return diffs
+
+
+def hamming_byte(bin1, bin2):
+    """XORing bytes with themselves should result in zero. The amount of ones after XOR is the Hamming distance"""
+
+    diffs = 0
+    xored = xor(bin1, bin2)
+    for byte in xored:
+        diffs += bin(byte).count("1")
+    return diffs
+
+
+def keysize_from_ciphertext(ciphertext):
+    """Guess the size of the XOR key applied to a cipher text.
+
+    Keyword arguments:
+    ciphertext -- the ciphertext that XOR was applied to
+    """
+
+    normalised_hammings = []
+
+    for KEYSIZE in range(3, 40):
+      s1 = ciphertext[:KEYSIZE]
+      s2 = ciphertext[KEYSIZE:KEYSIZE*2]
+      s3 = ciphertext[KEYSIZE*2:KEYSIZE*3]
+      s4 = ciphertext[KEYSIZE*3:KEYSIZE*4]
+
+      hammings = float(hamming_str(s1, s2) + hamming_str(s2, s3) + hamming_str(s3, s4))
+      hammings = hammings / (KEYSIZE * 3)
+      normalised_hammings.append((KEYSIZE, hammings))
+
+    sorted_hammings = sorted(normalised_hammings, key= lambda x: x[1])
+    return sorted_hammings
