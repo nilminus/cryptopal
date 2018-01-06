@@ -23,6 +23,6 @@ key = bytearray(keys * len(text))
 key = bytearray(keys * (len(text) / (KEYSIZE +1)))
 plaintext = bytes(xor(bytearray(ciphertext), key))
 
-print keys
-print KEYSIZE
-print plaintext
+print "Encryption key is: {}".format(keys)
+print "Encryption key size is: {}".format(KEYSIZE)
+# print plaintext
