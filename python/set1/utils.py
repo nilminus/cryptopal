@@ -57,3 +57,17 @@ def break_single_key_xor(b1):
             result_plaintext = plaintext
             key = chr(i)
     return key, result_plaintext
+
+
+def hamming(s1, s2):
+    # Only works for strings of same length because of zip()
+    # Update: works correctly cause of map(None, x, y)
+    diffs = 0
+    bin1 = bin(int(s1.encode('hex'), 16))
+    bin2 = bin(int(s2.encode('hex'), 16))
+
+    # for bit1, bit2 in zip(bin1, bin2):
+    for bit1, bit2 in map(None, bin1, bin2):
+        if bit1 != bit2:
+            diffs += 1
+    return diffs
