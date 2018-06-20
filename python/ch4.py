@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#y/usr/bin/env python
 
 input = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
 
@@ -73,4 +73,26 @@ def break_single_xor(b1):
 
     return key, result_plaintext
 
-print(break_single_xor(bytearray.fromhex(input)))
+max_score = 0
+result_plaintext = None
+key = None
+
+for line in open("4.txt", "r"):
+    line = line.strip()
+    b1 = bytearray.fromhex(line)
+
+
+    for i in range(0,255):
+        b2 = [i] * len(b1)
+        candidate = bxor(b1, b2)
+        try:
+            score_candidate = score(candidate.decode('ascii'))
+        
+            if max_score < score_candidate:
+                max_score = score_candidate
+                result_plaintext = candidate.decode('ascii')
+                key = chr(i)
+        except:
+            continue
+
+print(key, result_plaintext)
